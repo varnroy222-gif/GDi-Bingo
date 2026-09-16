@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GDi Bingo!</title>
+<style>
+  :root{
+    --ink:#0f2f45;
+    --paper:#eef6fa;
+    --tile:#dcebf4;
+    --tile-line:#b4d2e4;
+    --daub:#e2564d;
+    --daub-deep:#b83d36;
+    --win:#f2b544;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(120% 90% at 50% -10%, #14425e 0%, #0a2233 60%, #071a28 100%);
+    color:var(--paper);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:28px 18px 56px;
+  }
+  .wrap{width:100%;max-width:560px}
+  header{text-align:center;margin-bottom:22px}
+  h1{font-size:clamp(2.6rem,11vw,4rem);font-weight:800;letter-spacing:-.03em;line-height:.92;margin:0}
+  .sub{margin:10px 0 0;font-size:.95rem;line-height:1.5;color:#a8c6d8}
+
+  .card{
+    background:var(--paper);
+    border-radius:16px;
+    padding:14px;
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
+  }
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+
+  .cell{display:block;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .cell input{position:absolute;opacity:0;width:0;height:0}
+  .cell span{
+    display:flex;align-items:center;justify-content:center;
+    aspect-ratio:1;
+    border-radius:10px;
+    background:var(--tile);
+    box-shadow:inset 0 0 0 2px var(--tile-line);
+    color:var(--ink);
+    font-weight:800;
+    font-size:clamp(1.3rem,6.2vw,2rem);
+    font-variant-numeric:tabular-nums;
+    transition:background-color .12s ease,color .12s ease;
+  }
+  .cell input:checked + span{
+    background:var(--daub);
+    box-shadow:inset 0 0 0 2px var(--daub-deep);
+    color:#fff;
+  }
+  .cell input:focus-visible + span{outline:3px solid var(--win);outline-offset:3px}
+  .cell.win span{
+    background:var(--win);
+    box-shadow:inset 0 0 0 2px #c98d1c;
+    color:var(--ink);
+  }
+
+  .bar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-top:16px;font-size:.88rem;color:#a8c6d8;
+  }
+  .code b{color:var(--paper);letter-spacing:.06em}
+  button.link{
+    background:none;border:0;padding:0;color:#a8c6d8;
+    font-family:inherit;font-size:.88rem;font-weight:600;
+    text-decoration:underline;text-underline-offset:3px;cursor:pointer;
+  }
+  button.link:hover{color:var(--paper)}
+  .js-only{display:none}
+
+  .shout{
+    margin-top:18px;background:var(--win);color:#3d2a05;
+    border-radius:12px;padding:14px 16px;font-weight:800;font-size:1.05rem;
+    text-align:center;display:none;
+  }
+  .shout.show{display:block}
+
+  .caller{margin-top:26px;border-top:1px solid rgba(255,255,255,.12);padding-top:16px}
+  .caller-body{display:none;margin-top:14px;text-align:center}
+  .caller-body.show{display:block}
+  .drawn-now{font-size:clamp(3rem,16vw,5rem);font-weight:800;line-height:1;margin:6px 0 4px;font-variant-numeric:tabular-nums}
+  .draw-btn{
+    background:var(--daub);color:#fff;border:0;border-radius:10px;
+    padding:12px 24px;font-family:inherit;font-size:1rem;font-weight:800;cursor:pointer;margin-top:8px;
+  }
+  .called{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:16px}
+  .called span{background:rgba(255,255,255,.1);border-radius:6px;padding:4px 8px;font-size:.85rem;font-weight:600}
+  .hint{font-size:.85rem;color:#8fb2c7;margin:4px 0 0}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>GDi Bingo!</h1>
+    <p class="sub">Tap a number when it's called. Five in a row — across, down or corner to corner — wins. Your card stays yours, even if you reload.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid" id="grid">
+      <label class="cell"><input type="checkbox"><span>1</span></label>
+      <label class="cell"><input type="checkbox"><span>3</span></label>
+      <label class="cell"><input type="checkbox"><span>9</span></label>
+      <label class="cell"><input type="checkbox"><span>15</span></label>
+      <label class="cell"><input type="checkbox"><span>12</span></label>
+      <label class="cell"><input type="checkbox"><span>7</span></label>
+      <label class="cell"><input type="checkbox"><span>2</span></label>
+      <label class="cell"><input type="checkbox"><span>14</span></label>
+      <label class="cell"><input type="checkbox"><span>6</span></label>
+      <label class="cell"><input type="checkbox"><span>16</span></label>
+      <label class="cell"><input type="checkbox"><span>4</span></label>
+      <label class="cell"><input type="checkbox"><span>11</span></label>
+      <label class="cell"><input type="checkbox"><span>8</span></label>
+      <label class="cell"><input type="checkbox"><span>13</span></label>
+      <label class="cell"><input type="checkbox"><span>5</span></label>
+      <label class="cell"><input type="checkbox"><span>10</span></label>
+    </div>
+  </div>
+
+  <div class="bar">
+    <span class="code">Card <b id="code">SHARED</b></span>
+    <button class="link" id="reset" type="button">Clear marks</button>
+    <button class="link" id="newcard" type="button">🔄 Refresh numbers</button>
+  </div>
+
+  <div class="shout" id="shout">Bingo! Shout it out.</div>
+
+  <div class="caller js-only" id="caller">
+    <button class="link" id="toggleCaller" type="button">Running the game? Open the caller</button>
+    <div class="caller-body" id="callerBody">
+      <p class="hint">One person calls, everyone else plays.</p>
+      <div class="drawn-now" id="drawnNow">–</div>
+      <button class="draw-btn" id="draw" type="button">Call a number</button>
+      <div class="called" id="called"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var SIZE=4, MAX=16;
+  var grid=document.getElementById('grid');
+  var shout=document.getElementById('shout');
+
+  Array.prototype.forEach.call(document.querySelectorAll('.js-only'),function(el){
+    el.style.display='';
+  });
+
+  var ALPHA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+  // Seeded shuffle, so one seed always produces the same card.
+  function rngFrom(seed){
+    var h=2166136261;
+    for(var i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);}
+    return function(){
+      h+=0x6D2B79F5;
+      var t=h;
+      t=Math.imul(t^t>>>15,t|1);
+      t^=t+Math.imul(t^t>>>7,t|61);
+      return ((t^t>>>14)>>>0)/4294967296;
+    };
+  }
+  function shuffle(a,rand){
+    rand=rand||Math.random;
+    for(var i=a.length-1;i>0;i--){var j=Math.floor(rand()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+    return a;
+  }
+  function newSeed(){
+    var s='';
+    for(var i=0;i<5;i++)s+=ALPHA[Math.floor(Math.random()*ALPHA.length)];
+    return s;
+  }
+  function currentSeed(){
+    var h=(location.hash||'').replace(/^#/,'').toUpperCase().slice(0,5);
+    if(/^[A-Z0-9]{5}$/.test(h)) return h;
+    var stored;
+    try{ stored=localStorage.getItem('gdi-bingo-seed'); }catch(e){}
+    if(stored && /^[A-Z0-9]{5}$/.test(stored)) return stored;
+    return null;
+  }
+  function saveSeed(s){
+    try{ localStorage.setItem('gdi-bingo-seed',s); }catch(e){}
+    if(history && history.replaceState) history.replaceState(null,'','#'+s);
+    else location.hash=s;
+  }
+  var LINES=(function(){
+    var out=[],r,c,i,a;
+    for(r=0;r<SIZE;r++){a=[];for(c=0;c<SIZE;c++)a.push(r*SIZE+c);out.push(a);}
+    for(c=0;c<SIZE;c++){a=[];for(r=0;r<SIZE;r++)a.push(r*SIZE+c);out.push(a);}
+    var d1=[],d2=[];
+    for(i=0;i<SIZE;i++){d1.push(i*SIZE+i);d2.push(i*SIZE+(SIZE-1-i));}
+    out.push(d1);out.push(d2);
+    return out;
+  })();
+
+  function cells(){return document.querySelectorAll('.cell');}
+  function boxes(){return document.querySelectorAll('.cell input');}
+
+  function check(){
+    var cs=cells(),bs=boxes(),won=false;
+    Array.prototype.forEach.call(cs,function(c){c.classList.remove('win');});
+    LINES.forEach(function(line){
+      if(line.every(function(i){return bs[i].checked;})){
+        won=true;
+        line.forEach(function(i){cs[i].classList.add('win');});
+      }
+    });
+    shout.classList.toggle('show',won);
+  }
+
+  function saveMarks(){
+    var m='';
+    Array.prototype.forEach.call(boxes(),function(b){m+=b.checked?'1':'0';});
+    try{ localStorage.setItem('gdi-bingo-marks',m); }catch(e){}
+  }
+  function loadMarks(){
+    var m;
+    try{ m=localStorage.getItem('gdi-bingo-marks'); }catch(e){}
+    if(!m||m.length!==MAX) return;
+    Array.prototype.forEach.call(boxes(),function(b,i){b.checked=m[i]==='1';});
+  }
+
+  function deal(seed){
+    seed=seed||newSeed();
+    var nums=[];for(var n=1;n<=MAX;n++)nums.push(n);
+    shuffle(nums,rngFrom(seed));
+    Array.prototype.forEach.call(cells(),function(c,i){
+      c.querySelector('span').textContent=nums[i];
+      c.querySelector('input').checked=false;
+      c.classList.remove('win');
+    });
+    shout.classList.remove('show');
+    document.getElementById('code').textContent=seed;
+    saveSeed(seed);
+    return seed;
+  }
+
+  grid.addEventListener('change',function(){check();saveMarks();});
+
+  document.getElementById('reset').addEventListener('click',function(){
+    Array.prototype.forEach.call(boxes(),function(b){b.checked=false;});
+    check();saveMarks();
+  });
+  document.getElementById('newcard').addEventListener('click',function(){
+    deal();
+    try{ localStorage.removeItem('gdi-bingo-marks'); }catch(e){}
+  });
+
+  var pool=[],drawnNow=document.getElementById('drawnNow'),
+      calledBox=document.getElementById('called'),drawBtn=document.getElementById('draw');
+  function resetPool(){
+    pool=[];for(var n=1;n<=MAX;n++)pool.push(n);shuffle(pool);
+    calledBox.innerHTML='';drawnNow.textContent='–';drawBtn.textContent='Call a number';
+  }
+  resetPool();
+  drawBtn.addEventListener('click',function(){
+    if(!pool.length){resetPool();return;}
+    var n=pool.pop();
+    drawnNow.textContent=n;
+    var s=document.createElement('span');s.textContent=n;calledBox.appendChild(s);
+    if(!pool.length)drawBtn.textContent='Start a new round';
+  });
+  document.getElementById('toggleCaller').addEventListener('click',function(){
+    var open=document.getElementById('callerBody').classList.toggle('show');
+    this.textContent=open?'Hide the caller':'Running the game? Open the caller';
+  });
+
+  var existing=currentSeed();
+  deal(existing);
+  if(existing){ loadMarks(); check(); }
+})();
+</script>
+</body>
+</html>
